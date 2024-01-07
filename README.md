@@ -4,6 +4,7 @@ Python implementation of SIYI SDK for communication with ZR10 and A8 Mini camera
 * Camera webpage: http://en.siyi.biz/en/Gimbal%20Camera/ZR10/overview/
 * Documentation: http://en.siyi.biz/en/Gimbal%20Camera/ZR10/download/
 
+Repo based on this repo: https://github.com/mzahana/siyi_sdk.git
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/yTnAmtcHlzc/0.jpg)](https://www.youtube.com/watch?v=yTnAmtcHlzc)
 
