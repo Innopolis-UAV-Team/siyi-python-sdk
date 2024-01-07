@@ -1,11 +1,3 @@
-"""
-@file test_gimbal_rotation.py
-@Description: This is a test script for using the SIYI SDK Python implementation to set/get gimbal rotation
-@Author: Mohamed Abdelkader
-@Contact: mohamedashraf123@gmail.com
-All rights reserved 2022
-"""
-
 from time import sleep
 import sys
 import os
@@ -119,6 +111,3 @@ if __name__ == "__main__":
             pitch = att[1]
             cam.setRotation(yaw,pitch)
             init_flag = True
-    # cam.setGimbalRotation(yaw=0,pitch=-85,err_thresh=0.1,kp=0.1)
-
-    # print("Attitude (yaw,pitch,roll) eg:", cam.getAttitude())

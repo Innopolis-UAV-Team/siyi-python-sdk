@@ -105,42 +105,36 @@ from operator import itemgetter
 
 def return_nearest_obj(results, targetPose, trashhold=100):
     global model
-    # Получаем список всех обнаруженных объектов
+    # Get array of all found objects
     detections = np.array(results[0].boxes.xyxy.cpu(), dtype="int") # Используйте xyxy вместо boxes
     classes = np.array(results[0].boxes.cls.cpu(), dtype="int")
     track_ids = np.array(results[0].boxes.id.cpu(), dtype="int")
 
-    # Проверяем, есть ли обнаружения
+    # Check if detec samething
     if len(detections) > 0:
-        # Сортируем обнаружения по расстоянию до центра изображения        
+        # Sort object detection by dist from center of image   
         distances = [np.sqrt((((x[0] + x[2])/2)-targetPose[0])**2 + (((x[1] + x[3])/2)-targetPose[1])**2) for x in detections]
         sorted_indices = np.argsort(distances)
         detections = detections[sorted_indices]
         # Сортировка detections по distances
 
-        # Ближайший объект
+        # Found nearest object
         nearest_detection = detections[0]
         dist = np.sqrt((targetPose[0] - ((nearest_detection[0] + nearest_detection[2])/2))**2 + (targetPose[1] - ((nearest_detection[1] + nearest_detection[3])/2))**2)
         if dist > trashhold:
             print(" dist > trashhold")
             return None
 
-        # Координаты ближайшего объекта
+        # Coords of nearest object
         x1, y1, x2, y2 = nearest_detection[:4]
 
-        # # ID и имя класса ближайшего объекта
+        # # ID and name of nearest object
         class_id = classes[sorted_indices][0]
         track_id = track_ids[sorted_indices][0]
         name_id = model.names[class_id]
-        # class_name = results.names[class_id]
-        # print("targetPose",targetPose)        
-        # print(f"Координаты ближайшего объекта: {x1}, {y1}, {x2}, {y2}")
-        # print(f"ID класса ближайшего объекта: {track_id}")
-        # print(f"Имя класса ближайшего объекта: {name_id}")
-        # Вычисляем координаты центра
+
         center_x = int((x1 + x2) / 2)
         center_y = int((y1 + y2) / 2)
-        # print(f"Координаты центра ближайшего объекта: {center_x}, {center_y}")
         
         ml_obj = Track_Object()
         ml_obj.name = name_id
@@ -151,7 +145,7 @@ def return_nearest_obj(results, targetPose, trashhold=100):
 
         return ml_obj
     else:
-        print("Объекты не обнаружены.")
+        print("Object nit found.")
         return None
 
 # Called every time a mouse event happen
@@ -192,7 +186,8 @@ def draw_center(frame, track_point, color=(255, 255, 255), _thickness=1):
 
 def norm_2d_points(pts):
         """
-        Эта функция, norm_2d_points, предназначена для нормализации координат 2D точек. Она принимает на вход массив pts из четырех 2D точек.
+        This function, norm_2d_points, is designed to normalize the coordinates of 2D points. 
+        It takes as input a pts array of four 2D points.        
         """
         # sort the points based on their x-coordinates
         xSorted = pts[np.argsort(pts[:, 0]), :]
@@ -212,7 +207,7 @@ def norm_2d_points(pts):
 
 def tracking_camera(frame, track_point, control, power=0.03):
     """
-    Расчет смещения от трекинга
+    Calculation of offset from tracking
     """
 
     h, w, _ = frame.shape
@@ -230,9 +225,7 @@ if __name__ == "__main__":
     timer = 0
     is_bisy = False
     
-    # os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = 'rtsp_transport;udp'
     RTSP_URL = "rtsp://192.168.144.25:8554/main.264"
-    video_name = "/Users/devitt/Movies/demo.mp4"
 
     siyi_cap = VideoCapture(RTSP_URL)
 
@@ -241,11 +234,6 @@ if __name__ == "__main__":
     siyi_control = SIYIControl()
 
     while True:
-        # currnt_time = time()    
-        # dt = currnt_time - old_dt
-        # old_dt = currnt_time
-        # timer += dt
-        # print("dt: ", dt)
 
         # Read frame from camera
         if is_click:
@@ -298,16 +286,13 @@ if __name__ == "__main__":
                       cv2.circle(frame, select_obj_point.centerPoint, 5, (0, 0, 255), 5)
                       draw_center(frame, selected_point, color=(255, 255, 255), _thickness=1)
                       
-                      # tracking
-                      # selected_point = select_obj_point.centerPoint
-                      # tracking_camera(frame, selected_point, siyi_control, 0.03)
                     else:
                       draw_border(frame, (x,y), (x2, y2), (255,170,0), 2, 5, 10)
 
                     name = "ID: %s %s " % (track_id, model.names[cls])
                     cv2.putText(frame, name, (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 225), 2)
-                    # add center point of green box
                     
+                    # add center point of point
                     center_x = int((x + x2) / 2)
                     center_y = int((y + y2) / 2)
                     cv2.circle(frame, (center_x, center_y), 5, (255, 255, 255), 2)
@@ -317,8 +302,8 @@ if __name__ == "__main__":
             ret_tracking, bbox = tracker_roi.update(frame)
             if bbox_old != bbox:
                 bbox_old = bbox
-                # print("track", bbox)
-            # Рисование ограничивающего прямоугольника
+
+            # Draw bbox
             if ret_tracking:
                 p1_ot = (int(bbox[0]), int(bbox[1]))
                 p2_ot = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))               
@@ -328,7 +313,7 @@ if __name__ == "__main__":
                 center_x = int((x + x2) / 2)
                 center_y = int((y + y2) / 2)
                 track_history.append((int(center_x), int(center_y)))  # x, y center point
-                if len(track_history) > 10:  # retain 90 tracks for 90 frames
+                if len(track_history) > 10:  # retain 10 tracks for 10 frames
                     track_history.pop(0)
 
                 points = np.hstack(track_history).astype(np.int32).reshape((-1, 1, 2))
@@ -361,10 +346,10 @@ if __name__ == "__main__":
           track_history.clear()
 
           if select_obj_point:
-            #  выделение по ML
+            #  select by ML
              ret = tracker_roi.init(frame, select_obj_point.xywh())
           else:
-            # выделение по ROI
+            # select by ROI
             if bbox_ROI[2] == 0 or bbox_ROI[3] == 0:
               print("Roi not celect")
               drawing = False
@@ -375,7 +360,6 @@ if __name__ == "__main__":
                   tracker_roi = None
             else:             
               ret = tracker_roi.init(frame, bbox_ROI)
-
 
           # here do something with ROI points values (p1 and p2)
         elif pressed in [ord('c'), ord('C')]:

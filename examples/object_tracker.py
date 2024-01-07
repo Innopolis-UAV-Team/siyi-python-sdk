@@ -1,13 +1,12 @@
 import cv2
 import time
-# Инициализация трекера GOTURN
 
-# Загрузка видео
+# Videl load
 
 cap = cv2.VideoCapture(0)
 time.sleep(3)
 
-# Чтение первого кадра
+# Read frame
 ret, frame = cap.read()
 cv2.namedWindow('Tracking', cv2.WINDOW_NORMAL)
 # Our ROI, defined by two points
@@ -44,7 +43,6 @@ tracker = None
 bbox_old = (0, 0, 0, 0)
 
 while (cap.isOpened()):
-    # Чтение нового кадра
     ret, frame = cap.read()
     if not ret:
         break
